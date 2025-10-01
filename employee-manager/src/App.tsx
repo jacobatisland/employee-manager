@@ -38,6 +38,15 @@ function App() {
     }
   };
 
+  const testConnection = async () => {
+    try {
+      employeeAPI.setServerUrl(serverUrl);
+      await employeeAPI.fetchEmployees();
+    } catch (err) {
+      throw new Error(err instanceof Error ? err.message : 'Connection failed');
+    }
+  };
+
   // Set default view from settings when loaded
   useEffect(() => {
     if (isLoaded && settings.defaultView) {
@@ -197,7 +206,7 @@ function App() {
             onResetSettings={resetSettings}
             serverUrl={serverUrl}
             onServerUrlChange={setServerUrl}
-            onTestConnection={fetchEmployees}
+            onTestConnection={testConnection}
           />
         );
       default:
