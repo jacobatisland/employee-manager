@@ -19,6 +19,7 @@ function App() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorDismissed, setErrorDismissed] = useState(false);
   const [showEmployeeForm, setShowEmployeeForm] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [serverUrl, setServerUrl] = useState('http://localhost:3001');
@@ -27,6 +28,7 @@ function App() {
   const fetchEmployees = async () => {
     setLoading(true);
     setError(null);
+    setErrorDismissed(false);
     try {
       employeeAPI.setServerUrl(serverUrl);
       const data = await employeeAPI.fetchEmployees();
@@ -47,6 +49,11 @@ function App() {
     }
   };
 
+  const handleManualRefresh = () => {
+    setErrorDismissed(false);
+    fetchEmployees();
+  };
+
   // Set default view from settings when loaded
   useEffect(() => {
     if (isLoaded && settings.defaultView) {
@@ -56,7 +63,10 @@ function App() {
 
   useEffect(() => {
     if (currentView === 'employees' || currentView === 'dashboard') {
-      fetchEmployees();
+      // Only fetch if we don't have employees data or if there's no current error, or if error was not dismissed
+      if (employees.length === 0 || !error || !errorDismissed) {
+        fetchEmployees();
+      }
     }
   }, [currentView, serverUrl]);
 
@@ -182,7 +192,7 @@ function App() {
             employees={employees} 
             loading={loading} 
             error={error}
-            onRefresh={fetchEmployees}
+            onRefresh={handleManualRefresh}
           />
         );
       case 'employees':
@@ -195,7 +205,7 @@ function App() {
             onDelete={handleDeleteEmployee}
             onBulkDelete={handleBulkDelete}
             onExport={handleExportEmployees}
-            onRefresh={fetchEmployees}
+            onRefresh={handleManualRefresh}
           />
         );
       case 'settings':
@@ -215,7 +225,7 @@ function App() {
             employees={employees} 
             loading={loading} 
             error={error}
-            onRefresh={fetchEmployees}
+            onRefresh={handleManualRefresh}
           />
         );
     }
@@ -278,12 +288,15 @@ function App() {
       )}
 
       {/* Error Toast */}
-      {error && (
+      {error && !errorDismissed && (
         <div className="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg">
           <div className="flex items-center justify-between">
             <span>{error}</span>
             <button
-              onClick={() => setError(null)}
+              onClick={() => {
+                setError(null);
+                setErrorDismissed(true);
+              }}
               className="ml-4 text-white hover:text-gray-200"
             >
               ×
