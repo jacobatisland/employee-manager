@@ -4,10 +4,7 @@ A professional desktop application designed to demonstrate VPN/ZTNA capabilities
 
 ## 🎯 Purpose
 
-This application serves as a perfect demonstration tool for VPN/ZTNA products by:
-- **Client Application**: Runs on user devices (Windows/Mac) with zero dependencies
-- **Server Application**: Hosted on a private subnet, demonstrating the need for secure network access
-- **Realistic Business Use Case**: Employee management system that would typically be hosted internally
+This serves as a simple demo application for private access. This repo includes both the client and server application.
 
 ## 🏗️ Architecture
 
