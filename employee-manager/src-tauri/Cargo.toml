@@ -1,0 +1,23 @@
+[package]
+name = "employee-manager"
+version = "1.0.0"
+description = "Employee Management System for VPN Demo"
+authors = ["Demo Team"]
+license = "MIT"
+repository = ""
+default-run = "employee-manager"
+edition = "2021"
+rust-version = "1.77.2"
+
+[build-dependencies]
+tauri-build = { version = "2.0.2", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+tauri = { version = "2.0.2", features = [] }
+tauri-plugin-http = "2.0.2"
+tokio = { version = "1", features = ["full"] }
+
+[features]
+default = []

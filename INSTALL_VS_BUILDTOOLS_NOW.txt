@@ -1,0 +1,46 @@
+========================================
+VISUAL STUDIO BUILD TOOLS INSTALLER
+========================================
+
+The installer is downloaded and ready at:
+%TEMP%\vs_buildtools.exe
+
+========================================
+OPTION 1: Manual Installation (Recommended)
+========================================
+
+1. Press Windows Key + R
+2. Type: %TEMP%
+3. Press Enter
+4. Find and double-click: vs_buildtools.exe
+5. When prompted, click "Yes" to run as Administrator
+6. Select "Desktop development with C++"
+7. Click Install
+8. Wait 5-15 minutes for installation
+9. Restart your terminal when done
+
+========================================
+OPTION 2: Automated Installation
+========================================
+
+Open PowerShell AS ADMINISTRATOR and run:
+
+Start-Process "$env:TEMP\vs_buildtools.exe" -ArgumentList "--quiet","--wait","--add","Microsoft.VisualStudio.Workload.VCTools","--add","Microsoft.VisualStudio.Component.Windows11SDK.22000" -Wait
+
+========================================
+AFTER INSTALLATION
+========================================
+
+1. Close and reopen your terminal
+2. Navigate to: Z:\Documents\DemoApp\employee-manager
+3. Run: npm run tauri:build
+4. Your MSI will be at: src-tauri\target\release\bundle\msi\
+
+========================================
+NEED HELP?
+========================================
+
+See MSI_BUILD_GUIDE.md for detailed instructions
+
+========================================
+
