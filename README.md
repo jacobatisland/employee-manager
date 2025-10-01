@@ -43,13 +43,4 @@ cd server
 npm install --production
 npm run init-db
 npm start
-🔧 Development
-Prerequisites
-Rust: Latest stable version
-Node.js: v16 or higher
-npm: Latest version
-Development Workflow
-Start server: cd server && npm run dev
-Start client: cd employee-manager && npm run tauri:dev
-Make changes to React components or Rust backend
-Hot reload automatically applies changes
+
