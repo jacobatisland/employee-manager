@@ -1,6 +1,5 @@
 
-🚀 Quick Start
-1. Server Setup (Private Network)
+# 🚀 Quick Start
 # Navigate to server directory
 cd server
 
