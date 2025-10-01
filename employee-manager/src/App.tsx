@@ -54,6 +54,18 @@ function App() {
     fetchEmployees();
   };
 
+  const handleResetSettings = () => {
+    // Reset all app state to defaults
+    setServerUrl('http://localhost:3001');
+    setError(null);
+    setErrorDismissed(false);
+    setEmployees([]);
+    setCurrentView('employees');
+    
+    // Reset the settings hook
+    resetSettings();
+  };
+
   // Set default view from settings when loaded
   useEffect(() => {
     if (isLoaded && settings.defaultView) {
@@ -213,7 +225,7 @@ function App() {
           <UnifiedSettings
             settings={settings}
             onUpdateSettings={updateSettings}
-            onResetSettings={resetSettings}
+            onResetSettings={handleResetSettings}
             serverUrl={serverUrl}
             onServerUrlChange={setServerUrl}
             onTestConnection={testConnection}
@@ -287,23 +299,6 @@ function App() {
         />
       )}
 
-      {/* Error Toast */}
-      {error && !errorDismissed && (
-        <div className="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg">
-          <div className="flex items-center justify-between">
-            <span>{error}</span>
-            <button
-              onClick={() => {
-                setError(null);
-                setErrorDismissed(true);
-              }}
-              className="ml-4 text-white hover:text-gray-200"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      )}
 
         {/* Toast Notifications */}
         <ToastContainer toasts={toasts} onRemove={removeToast} />

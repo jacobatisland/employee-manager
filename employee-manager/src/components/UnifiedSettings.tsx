@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Settings, RotateCcw, Server, Globe, CheckCircle, XCircle, Info } from 'lucide-react';
 import { UserSettings } from '../hooks/useSettings';
 
@@ -22,6 +22,11 @@ const UnifiedSettings: React.FC<UnifiedSettingsProps> = ({
   const [localUrl, setLocalUrl] = useState(serverUrl);
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
   const [testResult, setTestResult] = useState<string>('');
+
+  // Sync local URL with server URL when it changes
+  useEffect(() => {
+    setLocalUrl(serverUrl);
+  }, [serverUrl]);
 
   const handleUrlChange = (url: string) => {
     setLocalUrl(url);
