@@ -46,9 +46,6 @@
     "windows": {
       "wix": {
         "language": ["en-US"],
-        "template": "wix-template.xml",
-        "fragmentPaths": [],
-        "componentGroupRefs": [],
         "skipWebviewInstall": false,
         "enableElevatedUpdateTask": false,
         "enableDesktopShortcut": true,
