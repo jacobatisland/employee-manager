@@ -39,23 +39,6 @@ LOG_LEVEL=info              # Logging level
 3. Set server URL: `http://your-server-ip:3001`
 4. Test connection
 
-## 🔒 VPN/ZTNA Demo Setup
-
-### Private Network Deployment
-```bash
-# Set private IP
-export SERVER_IP=192.168.1.100
-
-# Deploy server
-cd server && ./deploy.sh
-
-# Server runs on http://192.168.1.100:3001
-```
-
-### Client Configuration
-- Configure client to use private server IP
-- Test without VPN (should fail)
-- Test with VPN (should succeed)
 
 ## 📦 Client Distribution
 
