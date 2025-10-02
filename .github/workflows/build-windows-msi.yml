@@ -56,32 +56,7 @@ jobs:
         path: employee-manager/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi
         retention-days: 30
 
-    - name: Create Release
-      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-      uses: softprops/action-gh-release@v1
-      with:
-        files: employee-manager/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi
-        tag_name: v${{ github.run_number }}
-        name: Employee Management System v${{ github.run_number }}
-        body: |
-          ## Employee Management System - Windows MSI
-          
-          **Version:** ${{ github.run_number }}
-          **Platform:** Windows x64
-          **Format:** MSI Installer
-          
-          ### Installation
-          1. Download the MSI file
-          2. Run the installer as Administrator
-          3. Follow the installation wizard
-          4. Launch from Start Menu or Desktop shortcut
-          
-          ### Features
-          - Professional employee management interface
-          - Secure server connectivity
-          - Enterprise-ready deployment
-          - No additional dependencies required
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: List MSI files
+      run: |
+        echo "MSI files found:"
+        ls -la employee-manager/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/
