@@ -7,6 +7,7 @@ export interface UserSettings {
   autoRefresh: boolean;
   refreshInterval: number; // in minutes
   showWelcomeMessage: boolean;
+  serverUrl: string;
 }
 
 const defaultSettings: UserSettings = {
@@ -15,7 +16,8 @@ const defaultSettings: UserSettings = {
   itemsPerPage: 25,
   autoRefresh: false,
   refreshInterval: 5,
-  showWelcomeMessage: true
+  showWelcomeMessage: true,
+  serverUrl: 'http://localhost:3001'
 };
 
 const STORAGE_KEY = 'employee-manager-settings';

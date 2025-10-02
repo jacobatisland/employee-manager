@@ -22,7 +22,8 @@ function App() {
   const [errorDismissed, setErrorDismissed] = useState(false);
   const [showEmployeeForm, setShowEmployeeForm] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
-  const [serverUrl, setServerUrl] = useState('http://localhost:3001');
+  // Server URL is now managed through settings
+  const serverUrl = settings.serverUrl;
   const { toasts, removeToast, showSuccess, showError } = useToast();
 
   const fetchEmployees = async () => {
@@ -54,15 +55,18 @@ function App() {
     fetchEmployees();
   };
 
+  const handleServerUrlChange = (url: string) => {
+    updateSettings({ serverUrl: url });
+  };
+
   const handleResetSettings = () => {
     // Reset all app state to defaults
-    setServerUrl('http://localhost:3001');
     setError(null);
     setErrorDismissed(false);
     setEmployees([]);
     setCurrentView('employees');
     
-    // Reset the settings hook
+    // Reset the settings hook (includes server URL)
     resetSettings();
   };
 
@@ -227,7 +231,7 @@ function App() {
             onUpdateSettings={updateSettings}
             onResetSettings={handleResetSettings}
             serverUrl={serverUrl}
-            onServerUrlChange={setServerUrl}
+            onServerUrlChange={handleServerUrlChange}
             onTestConnection={testConnection}
           />
         );
