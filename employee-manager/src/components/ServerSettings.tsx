@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Server, CheckCircle, XCircle, Globe, Shield, Info } from 'lucide-react';
+import { Server, CheckCircle, XCircle, Globe, Info } from 'lucide-react';
 
 interface ServerSettingsProps {
   serverUrl: string;
