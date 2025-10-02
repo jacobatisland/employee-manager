@@ -81,7 +81,7 @@ const UnifiedSettings: React.FC<UnifiedSettingsProps> = ({
           </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-900">Server Configuration</h3>
-            <p className="text-sm text-gray-600">Configure your connection to the Employee Manager server</p>
+            <p className="text-sm text-gray-600">Configure your connection to the Employee Management System server</p>
           </div>
         </div>
 
@@ -102,7 +102,7 @@ const UnifiedSettings: React.FC<UnifiedSettingsProps> = ({
                   placeholder="http://localhost:3001"
                 />
                 <p className="mt-1 text-sm text-gray-500">
-                  Enter the full URL of your Employee Manager server
+                  Enter the full URL of your Employee Management System server
                 </p>
               </div>
             </div>

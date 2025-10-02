@@ -73,7 +73,7 @@ const ServerSettings: React.FC<ServerSettingsProps> = ({
                   placeholder="http://localhost:3001"
                 />
                 <p className="mt-1 text-sm text-gray-500">
-                  Enter the full URL of your Employee Manager server
+                  Enter the full URL of your Employee Management System server
                 </p>
               </div>
             </div>
