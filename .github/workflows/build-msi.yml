@@ -1,11 +1,7 @@
-name: Build Windows MSI
+name: Build Windows MSI Installer
 
 on:
   push:
-    branches: [ master ]
-    paths:
-      - 'employee-manager/**'
-  pull_request:
     branches: [ master ]
     paths:
       - 'employee-manager/**'
@@ -49,14 +45,14 @@ jobs:
       working-directory: employee-manager
       run: npm run tauri build -- --target x86_64-pc-windows-msvc
 
+    - name: List MSI files
+      run: |
+        echo "MSI files found:"
+        ls -la employee-manager/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/
+
     - name: Upload MSI artifact
       uses: actions/upload-artifact@v4
       with:
         name: employee-management-system-windows-msi
         path: employee-manager/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi
         retention-days: 30
-
-    - name: List MSI files
-      run: |
-        echo "MSI files found:"
-        ls -la employee-manager/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/
