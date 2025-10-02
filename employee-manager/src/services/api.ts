@@ -3,6 +3,39 @@ import { Employee } from '../types';
 
 const SERVER_URL = 'http://localhost:3001'; // Default server URL
 
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  department?: string;
+  status?: string;
+  sortBy?: string;
+  sortOrder?: 'ASC' | 'DESC';
+  minSalary?: number;
+  maxSalary?: number;
+}
+
+export interface PaginatedResponse<T> {
+  employees: T[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalRecords: number;
+    pageSize: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+  filters: {
+    search: string;
+    department: string;
+    status: string;
+    sortBy: string;
+    sortOrder: string;
+    minSalary: string;
+    maxSalary: string;
+  };
+}
+
 export class EmployeeAPI {
   private serverUrl: string;
 
@@ -10,15 +43,27 @@ export class EmployeeAPI {
     this.serverUrl = serverUrl;
   }
 
-  async fetchEmployees(): Promise<Employee[]> {
+  async fetchEmployees(params: PaginationParams = {}): Promise<PaginatedResponse<Employee>> {
     try {
-      const employees = await invoke<Employee[]>('fetch_employees', {
+      const response = await invoke<PaginatedResponse<Employee>>('fetch_employees_paginated', {
         serverUrl: this.serverUrl,
+        params,
       });
-      return employees;
+      return response;
     } catch (error) {
       console.error('Failed to fetch employees:', error);
       throw new Error(`Failed to fetch employees: ${error}`);
+    }
+  }
+
+  // Legacy method for backward compatibility
+  async fetchAllEmployees(): Promise<Employee[]> {
+    try {
+      const response = await this.fetchEmployees({ limit: 10000 }); // Large limit to get all
+      return response.employees;
+    } catch (error) {
+      console.error('Failed to fetch all employees:', error);
+      throw new Error(`Failed to fetch all employees: ${error}`);
     }
   }
 

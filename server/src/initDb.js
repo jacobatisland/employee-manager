@@ -96,7 +96,7 @@ const sampleEmployees = [
 function initializeDatabase() {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
-      // Create employees table
+      // Create employees table with all new fields
       db.run(`
         CREATE TABLE IF NOT EXISTS employees (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -106,6 +106,12 @@ function initializeDatabase() {
           position TEXT NOT NULL,
           salary INTEGER NOT NULL,
           hire_date TEXT NOT NULL,
+          ssn TEXT,
+          phone TEXT,
+          address TEXT,
+          employee_id TEXT UNIQUE,
+          status TEXT DEFAULT 'Active',
+          manager TEXT,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )

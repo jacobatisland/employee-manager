@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Employee {
@@ -11,6 +12,67 @@ struct Employee {
     position: String,
     salary: u32,
     hire_date: String,
+    ssn: Option<String>,
+    phone: Option<String>,
+    address: Option<String>,
+    employee_id: Option<String>,
+    status: Option<String>,
+    manager: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct PaginationParams {
+    page: Option<u32>,
+    limit: Option<u32>,
+    search: Option<String>,
+    department: Option<String>,
+    status: Option<String>,
+    #[serde(rename = "sortBy")]
+    sort_by: Option<String>,
+    #[serde(rename = "sortOrder")]
+    sort_order: Option<String>,
+    #[serde(rename = "minSalary")]
+    min_salary: Option<u32>,
+    #[serde(rename = "maxSalary")]
+    max_salary: Option<u32>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Pagination {
+    #[serde(rename = "currentPage")]
+    current_page: u32,
+    #[serde(rename = "totalPages")]
+    total_pages: u32,
+    #[serde(rename = "totalRecords")]
+    total_records: u32,
+    #[serde(rename = "pageSize")]
+    page_size: u32,
+    #[serde(rename = "hasNextPage")]
+    has_next_page: bool,
+    #[serde(rename = "hasPreviousPage")]
+    has_previous_page: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Filters {
+    search: String,
+    department: String,
+    status: String,
+    #[serde(rename = "sortBy")]
+    sort_by: String,
+    #[serde(rename = "sortOrder")]
+    sort_order: String,
+    #[serde(rename = "minSalary")]
+    min_salary: String,
+    #[serde(rename = "maxSalary")]
+    max_salary: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct PaginatedResponse {
+    employees: Vec<Employee>,
+    pagination: Pagination,
+    filters: Filters,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -22,8 +84,52 @@ struct ApiResponse<T> {
 
 // Tauri commands for communicating with the server
 #[tauri::command]
-async fn fetch_employees(server_url: String) -> Result<Vec<Employee>, String> {
-    let url = format!("{}/api/employees", server_url);
+async fn fetch_employees_paginated(server_url: String, params: PaginationParams) -> Result<PaginatedResponse, String> {
+    let mut url = format!("{}/api/employees", server_url);
+    let mut query_params = Vec::new();
+    
+    if let Some(page) = params.page {
+        query_params.push(format!("page={}", page));
+    }
+    if let Some(limit) = params.limit {
+        query_params.push(format!("limit={}", limit));
+    }
+    if let Some(search) = params.search {
+        if !search.is_empty() {
+            query_params.push(format!("search={}", urlencoding::encode(&search)));
+        }
+    }
+    if let Some(department) = params.department {
+        if !department.is_empty() {
+            query_params.push(format!("department={}", urlencoding::encode(&department)));
+        }
+    }
+    if let Some(status) = params.status {
+        if !status.is_empty() {
+            query_params.push(format!("status={}", urlencoding::encode(&status)));
+        }
+    }
+    if let Some(sort_by) = params.sort_by {
+        if !sort_by.is_empty() {
+            query_params.push(format!("sortBy={}", sort_by));
+        }
+    }
+    if let Some(sort_order) = params.sort_order {
+        if !sort_order.is_empty() {
+            query_params.push(format!("sortOrder={}", sort_order));
+        }
+    }
+    if let Some(min_salary) = params.min_salary {
+        query_params.push(format!("minSalary={}", min_salary));
+    }
+    if let Some(max_salary) = params.max_salary {
+        query_params.push(format!("maxSalary={}", max_salary));
+    }
+    
+    if !query_params.is_empty() {
+        url.push('?');
+        url.push_str(&query_params.join("&"));
+    }
     
     let response = tauri_plugin_http::reqwest::get(&url)
         .await
@@ -33,13 +139,34 @@ async fn fetch_employees(server_url: String) -> Result<Vec<Employee>, String> {
         .await
         .map_err(|e| format!("Failed to read response: {}", e))?;
     
-    let api_response: ApiResponse<Vec<Employee>> = serde_json::from_str(&body)
+    let api_response: ApiResponse<PaginatedResponse> = serde_json::from_str(&body)
         .map_err(|e| format!("Failed to parse JSON: {}", e))?;
     
     if api_response.success {
-        Ok(api_response.data.unwrap_or_default())
+        Ok(api_response.data.unwrap())
     } else {
         Err(api_response.message.unwrap_or("Unknown error".to_string()))
+    }
+}
+
+// Legacy method for backward compatibility
+#[tauri::command]
+async fn fetch_employees(server_url: String) -> Result<Vec<Employee>, String> {
+    let params = PaginationParams {
+        page: Some(1),
+        limit: Some(10000), // Large limit to get all employees
+        search: None,
+        department: None,
+        status: None,
+        sort_by: Some("name".to_string()),
+        sort_order: Some("ASC".to_string()),
+        min_salary: None,
+        max_salary: None,
+    };
+    
+    match fetch_employees_paginated(server_url, params).await {
+        Ok(response) => Ok(response.employees),
+        Err(e) => Err(e),
     }
 }
 
@@ -139,6 +266,7 @@ fn main() {
         .plugin(tauri_plugin_http::init())
         .invoke_handler(tauri::generate_handler![
             fetch_employees,
+            fetch_employees_paginated,
             create_employee,
             update_employee,
             delete_employee

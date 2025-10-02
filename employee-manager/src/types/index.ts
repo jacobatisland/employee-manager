@@ -6,6 +6,12 @@ export interface Employee {
   position: string;
   salary: number;
   hire_date: string;
+  ssn: string;
+  phone: string;
+  address: string;
+  employee_id: string;
+  status: 'Active' | 'Inactive' | 'On Leave';
+  manager: string;
 }
 
 export interface ApiResponse<T> {

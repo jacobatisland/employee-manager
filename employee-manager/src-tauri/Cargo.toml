@@ -1,6 +1,6 @@
 [package]
 name = "employee-manager"
-version = "1.0.0"
+version = "1.0.1"
 description = "Employee Management System for VPN Demo"
 authors = ["Demo Team"]
 license = "MIT"
@@ -18,6 +18,7 @@ serde = { version = "1.0", features = ["derive"] }
 tauri = { version = "2.0.2", features = [] }
 tauri-plugin-http = "2.0.2"
 tokio = { version = "1", features = ["full"] }
+urlencoding = "2.1"
 
 [features]
 default = []

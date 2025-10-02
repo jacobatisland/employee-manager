@@ -48,8 +48,7 @@ const Sidebar: React.FC<SidebarProps> = ({ menuItems, currentView, onViewChange 
       {/* Footer */}
       <div className="p-4 border-t border-gray-200 dark:border-gray-700 mt-auto">
         <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
-          <p>Version 1.0.0</p>
-          <p>© 2024 Demo Team</p>
+          <p>Version 1.0.1</p>
         </div>
       </div>
     </div>

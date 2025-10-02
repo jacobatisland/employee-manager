@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Employee } from '../types';
-import { Users, Building2, DollarSign, Calendar, TrendingUp, Award, Target, Clock, RefreshCw } from 'lucide-react';
+import { Users, Building2, DollarSign, Calendar, TrendingUp, Award, Target, Clock } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import LoadingSkeleton from './LoadingSkeleton';
 
@@ -8,10 +8,9 @@ interface DashboardProps {
   employees: Employee[];
   loading: boolean;
   error: string | null;
-  onRefresh?: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ employees, loading, error, onRefresh }) => {
+const Dashboard: React.FC<DashboardProps> = ({ employees, loading, error }) => {
   const stats = useMemo(() => {
     if (!employees.length) {
       return {
@@ -165,23 +164,6 @@ const Dashboard: React.FC<DashboardProps> = ({ employees, loading, error, onRefr
 
   return (
     <div className="space-y-6">
-      {/* Dashboard Header with Refresh */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
-          <p className="text-gray-600 mt-1">Overview of your organization</p>
-        </div>
-        {onRefresh && (
-          <button
-            onClick={onRefresh}
-            disabled={loading}
-            className="btn-secondary flex items-center gap-2"
-          >
-            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-            Refresh Data
-          </button>
-        )}
-      </div>
 
       {/* Enhanced Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -1,6 +1,6 @@
 {
   "name": "employee-manager",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Employee Management System for VPN Demo",
   "type": "module",
   "scripts": {

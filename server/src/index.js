@@ -55,21 +55,117 @@ const sendResponse = (res, success, data = null, message = null) => {
 
 // API Routes
 
-// Get all employees
+// Get all employees with pagination and filtering
 app.get('/api/employees', (req, res) => {
-  const query = `
-    SELECT id, name, email, department, position, salary, hire_date
-    FROM employees
-    ORDER BY name ASC
-  `;
+  const {
+    page = 1,
+    limit = 50,
+    search = '',
+    department = '',
+    status = '',
+    sortBy = 'name',
+    sortOrder = 'ASC',
+    minSalary = '',
+    maxSalary = ''
+  } = req.query;
+
+  const offset = (parseInt(page) - 1) * parseInt(limit);
+  const pageSize = parseInt(limit);
+
+  // Build WHERE clause
+  let whereConditions = [];
+  let params = [];
+
+  if (search) {
+    whereConditions.push(`(
+      name LIKE ? OR 
+      email LIKE ?
+    )`);
+    const searchParam = `%${search}%`;
+    params.push(searchParam, searchParam);
+  }
+
+  if (department) {
+    whereConditions.push('department = ?');
+    params.push(department);
+  }
+
+  if (status) {
+    whereConditions.push('status = ?');
+    params.push(status);
+  }
+
+  if (minSalary) {
+    whereConditions.push('salary >= ?');
+    params.push(parseInt(minSalary));
+  }
+
+  if (maxSalary) {
+    whereConditions.push('salary <= ?');
+    params.push(parseInt(maxSalary));
+  }
+
+  const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+
+  // Validate sort column to prevent SQL injection
+  const validSortColumns = ['name', 'email', 'department', 'position', 'salary', 'hire_date', 'status', 'employee_id'];
+  const sortColumn = validSortColumns.includes(sortBy) ? sortBy : 'name';
+  const sortDirection = sortOrder.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+
+  // Count total records
+  const countQuery = `SELECT COUNT(*) as total FROM employees ${whereClause}`;
   
-  db.all(query, [], (err, rows) => {
+  db.get(countQuery, params, (err, countResult) => {
     if (err) {
-      console.error('Error fetching employees:', err);
-      sendResponse(res, false, null, 'Failed to fetch employees');
+      console.error('Error counting employees:', err);
+      sendResponse(res, false, null, 'Failed to count employees');
       return;
     }
-    sendResponse(res, true, rows);
+
+    const totalRecords = countResult.total;
+    const totalPages = Math.ceil(totalRecords / pageSize);
+
+    // Get paginated data
+    const dataQuery = `
+      SELECT 
+        id, name, email, department, position, salary, hire_date,
+        ssn, phone, address, employee_id, status, manager
+      FROM employees 
+      ${whereClause}
+      ORDER BY ${sortColumn} ${sortDirection}
+      LIMIT ? OFFSET ?
+    `;
+    
+    const dataParams = [...params, pageSize, offset];
+    
+    db.all(dataQuery, dataParams, (err, rows) => {
+      if (err) {
+        console.error('Error fetching employees:', err);
+        sendResponse(res, false, null, 'Failed to fetch employees');
+        return;
+      }
+
+      sendResponse(res, true, {
+        employees: rows,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages,
+          totalRecords,
+          pageSize,
+          hasNextPage: parseInt(page) < totalPages,
+          hasPreviousPage: parseInt(page) > 1
+        },
+        filters: {
+          search,
+          department,
+          status,
+          sortBy: sortColumn,
+          sortOrder: sortDirection,
+          minSalary,
+          maxSalary
+        }
+      });
+    });
   });
 });
 
@@ -78,7 +174,9 @@ app.get('/api/employees/:id', (req, res) => {
   const { id } = req.params;
   
   const query = `
-    SELECT id, name, email, department, position, salary, hire_date
+    SELECT 
+      id, name, email, department, position, salary, hire_date,
+      ssn, phone, address, employee_id, status, manager
     FROM employees
     WHERE id = ?
   `;
@@ -101,24 +199,32 @@ app.get('/api/employees/:id', (req, res) => {
 
 // Create new employee
 app.post('/api/employees', (req, res) => {
-  const { name, email, department, position, salary, hire_date } = req.body;
+  const { 
+    name, email, department, position, salary, hire_date,
+    ssn, phone, address, employee_id, status, manager 
+  } = req.body;
   
   // Validation
   if (!name || !email || !department || !position || !salary || !hire_date) {
-    sendResponse(res, false, null, 'All fields are required');
+    sendResponse(res, false, null, 'Required fields: name, email, department, position, salary, hire_date');
     return;
   }
   
   const query = `
-    INSERT INTO employees (name, email, department, position, salary, hire_date)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO employees (
+      name, email, department, position, salary, hire_date,
+      ssn, phone, address, employee_id, status, manager
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
   
-  db.run(query, [name, email, department, position, salary, hire_date], function(err) {
+  db.run(query, [
+    name, email, department, position, salary, hire_date,
+    ssn, phone, address, employee_id, status || 'Active', manager
+  ], function(err) {
     if (err) {
       console.error('Error creating employee:', err);
       if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
-        sendResponse(res, false, null, 'Email address already exists');
+        sendResponse(res, false, null, 'Email address or Employee ID already exists');
       } else {
         sendResponse(res, false, null, 'Failed to create employee');
       }
@@ -127,7 +233,9 @@ app.post('/api/employees', (req, res) => {
     
     // Fetch the created employee
     const selectQuery = `
-      SELECT id, name, email, department, position, salary, hire_date
+      SELECT 
+        id, name, email, department, position, salary, hire_date,
+        ssn, phone, address, employee_id, status, manager
       FROM employees
       WHERE id = ?
     `;
@@ -146,25 +254,33 @@ app.post('/api/employees', (req, res) => {
 // Update employee
 app.put('/api/employees/:id', (req, res) => {
   const { id } = req.params;
-  const { name, email, department, position, salary, hire_date } = req.body;
+  const { 
+    name, email, department, position, salary, hire_date,
+    ssn, phone, address, employee_id, status, manager 
+  } = req.body;
   
   // Validation
   if (!name || !email || !department || !position || !salary || !hire_date) {
-    sendResponse(res, false, null, 'All fields are required');
+    sendResponse(res, false, null, 'Required fields: name, email, department, position, salary, hire_date');
     return;
   }
   
   const query = `
     UPDATE employees
-    SET name = ?, email = ?, department = ?, position = ?, salary = ?, hire_date = ?, updated_at = CURRENT_TIMESTAMP
+    SET name = ?, email = ?, department = ?, position = ?, salary = ?, hire_date = ?,
+        ssn = ?, phone = ?, address = ?, employee_id = ?, status = ?, manager = ?,
+        updated_at = CURRENT_TIMESTAMP
     WHERE id = ?
   `;
   
-  db.run(query, [name, email, department, position, salary, hire_date, id], function(err) {
+  db.run(query, [
+    name, email, department, position, salary, hire_date,
+    ssn, phone, address, employee_id, status || 'Active', manager, id
+  ], function(err) {
     if (err) {
       console.error('Error updating employee:', err);
       if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
-        sendResponse(res, false, null, 'Email address already exists');
+        sendResponse(res, false, null, 'Email address or Employee ID already exists');
       } else {
         sendResponse(res, false, null, 'Failed to update employee');
       }
@@ -178,7 +294,9 @@ app.put('/api/employees/:id', (req, res) => {
     
     // Fetch the updated employee
     const selectQuery = `
-      SELECT id, name, email, department, position, salary, hire_date
+      SELECT 
+        id, name, email, department, position, salary, hire_date,
+        ssn, phone, address, employee_id, status, manager
       FROM employees
       WHERE id = ?
     `;

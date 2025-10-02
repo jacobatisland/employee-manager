@@ -1,6 +1,6 @@
 import React from 'react';
 import { Employee } from '../types';
-import { Edit, Trash2, Mail, Calendar, DollarSign } from 'lucide-react';
+import { Edit, Trash2, Mail, Calendar, DollarSign, Phone, User, Building, Badge } from 'lucide-react';
 
 interface EmployeeCardProps {
   employee: Employee;
@@ -65,9 +65,18 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
     return colors[id % colors.length];
   };
 
+  const getStatusColor = (status: string) => {
+    const colors: Record<string, string> = {
+      'Active': 'bg-green-100 text-green-800 border-green-200',
+      'Inactive': 'bg-gray-100 text-gray-800 border-gray-200',
+      'On Leave': 'bg-yellow-100 text-yellow-800 border-yellow-200'
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800 border-gray-200';
+  };
+
   return (
-    <div className={`card hover:shadow-md transition-all duration-200 relative ${
-      isSelected ? 'ring-2 ring-primary-500 shadow-md' : ''
+    <div className={`bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 relative p-6 ${
+      isSelected ? 'ring-2 ring-blue-500 shadow-md' : ''
     }`}>
       {/* Selection Checkbox */}
       {onSelect && (
@@ -76,24 +85,37 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
             type="checkbox"
             checked={isSelected}
             onChange={(e) => onSelect(employee.id, e.target.checked)}
-            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
           />
         </div>
       )}
 
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-4">
           {/* Avatar */}
-          <div className={`w-12 h-12 rounded-full ${getAvatarColor(employee.id)} flex items-center justify-center text-white font-semibold text-lg`}>
+          <div className={`w-14 h-14 rounded-lg ${getAvatarColor(employee.id)} flex items-center justify-center text-white font-semibold text-lg shadow-sm`}>
             {getInitials(employee.name)}
           </div>
           
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-semibold text-gray-900 truncate">
-              {employee.name}
-            </h3>
-            <p className="text-sm text-gray-600 truncate">{employee.position}</p>
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="text-lg font-semibold text-gray-900 truncate">
+                {employee.name}
+              </h3>
+              {employee.employee_id && (
+                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                  {employee.employee_id}
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-gray-600 truncate font-medium">{employee.position}</p>
+            {employee.manager && (
+              <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
+                <User size={12} />
+                Reports to {employee.manager}
+              </p>
+            )}
           </div>
         </div>
 
@@ -101,7 +123,7 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
         <div className="flex space-x-1">
           <button
             onClick={() => onEdit(employee)}
-            className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
             title="Edit employee"
           >
             <Edit size={16} />
@@ -116,40 +138,72 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
         </div>
       </div>
 
-      {/* Department Badge */}
-      <div className="mb-4">
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getDepartmentColor(employee.department)}`}>
+      {/* Status and Department */}
+      <div className="flex items-center gap-2 mb-4">
+        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border ${getDepartmentColor(employee.department)}`}>
+          <Building size={12} className="mr-1" />
           {employee.department}
+        </span>
+        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border ${getStatusColor(employee.status || 'Active')}`}>
+          <Badge size={12} className="mr-1" />
+          {employee.status || 'Active'}
         </span>
       </div>
 
-      {/* Employee Details */}
-      <div className="space-y-3">
+      {/* Employee Details Grid */}
+      <div className="grid grid-cols-1 gap-3 mb-4">
         {/* Email */}
-        <div className="flex items-center space-x-2 text-sm text-gray-600">
-          <Mail size={14} className="text-gray-400" />
-          <span className="truncate">{employee.email}</span>
+        <div className="flex items-center space-x-3 text-sm">
+          <div className="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-lg">
+            <Mail size={14} className="text-gray-500" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-gray-500 uppercase tracking-wide">Email</p>
+            <p className="text-gray-900 truncate font-medium">{employee.email}</p>
+          </div>
         </div>
 
+        {/* Phone */}
+        {employee.phone && (
+          <div className="flex items-center space-x-3 text-sm">
+            <div className="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-lg">
+              <Phone size={14} className="text-gray-500" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-gray-500 uppercase tracking-wide">Phone</p>
+              <p className="text-gray-900 truncate font-medium">{employee.phone}</p>
+            </div>
+          </div>
+        )}
+
         {/* Salary */}
-        <div className="flex items-center space-x-2 text-sm text-gray-600">
-          <DollarSign size={14} className="text-gray-400" />
-          <span className="font-medium text-gray-900">{formatSalary(employee.salary)}</span>
-          <span className="text-gray-500">annually</span>
+        <div className="flex items-center space-x-3 text-sm">
+          <div className="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-lg">
+            <DollarSign size={14} className="text-gray-500" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-gray-500 uppercase tracking-wide">Annual Salary</p>
+            <p className="text-gray-900 font-semibold">{formatSalary(employee.salary)}</p>
+          </div>
         </div>
 
         {/* Hire Date */}
-        <div className="flex items-center space-x-2 text-sm text-gray-600">
-          <Calendar size={14} className="text-gray-400" />
-          <span>Hired {formatDate(employee.hire_date)}</span>
+        <div className="flex items-center space-x-3 text-sm">
+          <div className="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-lg">
+            <Calendar size={14} className="text-gray-500" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-gray-500 uppercase tracking-wide">Hire Date</p>
+            <p className="text-gray-900 font-medium">{formatDate(employee.hire_date)}</p>
+          </div>
         </div>
       </div>
 
-      {/* Experience Badge */}
-      <div className="mt-4 pt-4 border-t border-gray-100">
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-500">Experience</span>
-          <span className="text-xs font-medium text-gray-700">
+      {/* Footer Stats */}
+      <div className="pt-4 border-t border-gray-100">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-gray-500">Years of Service</span>
+          <span className="font-semibold text-gray-700 bg-gray-100 px-2 py-1 rounded">
             {Math.floor((Date.now() - new Date(employee.hire_date).getTime()) / (365.25 * 24 * 60 * 60 * 1000))} years
           </span>
         </div>

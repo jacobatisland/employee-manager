@@ -3,28 +3,25 @@ import { Employee } from './types';
 import { employeeAPI } from './services/api';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
-import EnhancedEmployeeList from './components/EnhancedEmployeeList';
-import EmployeeForm from './components/EmployeeForm';
+import EnterpriseEmployeeTable from './components/EnterpriseEmployeeTable';
 import UnifiedSettings from './components/UnifiedSettings';
 import { ToastContainer, useToast } from './components/Toast';
 import { useSettings } from './hooks/useSettings';
 import { ThemeProvider } from './contexts/ThemeContext';
-import { Users, BarChart3, Settings, Plus } from 'lucide-react';
+import { Users, BarChart3, Settings, RefreshCw } from 'lucide-react';
 
 type View = 'dashboard' | 'employees' | 'settings';
 
 function App() {
-  const { settings, updateSettings, resetSettings, isLoaded } = useSettings();
+  const { settings, updateSettings, isLoaded } = useSettings();
   const [currentView, setCurrentView] = useState<View>('employees'); // Default to employees
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorDismissed, setErrorDismissed] = useState(false);
-  const [showEmployeeForm, setShowEmployeeForm] = useState(false);
-  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   // Server URL is now managed through settings
   const serverUrl = settings.serverUrl;
-  const { toasts, removeToast, showSuccess, showError } = useToast();
+  const { toasts, removeToast, showSuccess } = useToast();
 
   const fetchEmployees = async () => {
     setLoading(true);
@@ -32,7 +29,8 @@ function App() {
     setErrorDismissed(false);
     try {
       employeeAPI.setServerUrl(serverUrl);
-      const data = await employeeAPI.fetchEmployees();
+      // For dashboard and legacy compatibility, fetch all employees
+      const data = await employeeAPI.fetchAllEmployees();
       setEmployees(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch employees');
@@ -44,7 +42,7 @@ function App() {
   const testConnection = async () => {
     try {
       employeeAPI.setServerUrl(serverUrl);
-      await employeeAPI.fetchEmployees();
+      await employeeAPI.fetchEmployees({ limit: 1 }); // Just test with 1 record
     } catch (err) {
       throw new Error(err instanceof Error ? err.message : 'Connection failed');
     }
@@ -59,16 +57,6 @@ function App() {
     updateSettings({ serverUrl: url });
   };
 
-  const handleResetSettings = () => {
-    // Reset all app state to defaults
-    setError(null);
-    setErrorDismissed(false);
-    setEmployees([]);
-    setCurrentView('employees');
-    
-    // Reset the settings hook (includes server URL)
-    resetSettings();
-  };
 
   // Set default view from settings when loaded
   useEffect(() => {
@@ -99,75 +87,24 @@ function App() {
     return () => clearInterval(interval);
   }, [settings.autoRefresh, settings.refreshInterval, currentView]);
 
-  const handleCreateEmployee = async (employeeData: Omit<Employee, 'id'>) => {
-    try {
-      const newEmployee = await employeeAPI.createEmployee(employeeData);
-      setEmployees(prev => [...prev, newEmployee]);
-      setShowEmployeeForm(false);
-      showSuccess('Employee Created', `${employeeData.name} has been added to the team.`);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create employee';
-      setError(errorMessage);
-      showError('Creation Failed', errorMessage);
-    }
-  };
 
-  const handleUpdateEmployee = async (id: number, employeeData: Employee) => {
-    try {
-      const updatedEmployee = await employeeAPI.updateEmployee(id, employeeData);
-      setEmployees(prev => prev.map(emp => emp.id === id ? updatedEmployee : emp));
-      setEditingEmployee(null);
-      setShowEmployeeForm(false);
-      showSuccess('Employee Updated', `${employeeData.name}'s information has been updated.`);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update employee';
-      setError(errorMessage);
-      showError('Update Failed', errorMessage);
-    }
-  };
 
-  const handleDeleteEmployee = async (id: number) => {
-    const employee = employees.find(emp => emp.id === id);
-    if (!employee) return;
-
-    if (!confirm(`Are you sure you want to delete ${employee.name}? This action cannot be undone.`)) return;
-    
-    try {
-      await employeeAPI.deleteEmployee(id);
-      setEmployees(prev => prev.filter(emp => emp.id !== id));
-      showSuccess('Employee Deleted', `${employee.name} has been removed from the team.`);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete employee';
-      setError(errorMessage);
-      showError('Deletion Failed', errorMessage);
-    }
-  };
-
-  const handleBulkDelete = async (ids: number[]) => {
-    if (!confirm(`Are you sure you want to delete ${ids.length} employees? This action cannot be undone.`)) return;
-    
-    try {
-      const deletePromises = ids.map(id => employeeAPI.deleteEmployee(id));
-      await Promise.all(deletePromises);
-      setEmployees(prev => prev.filter(emp => !ids.includes(emp.id)));
-      showSuccess('Employees Deleted', `${ids.length} employees have been removed from the team.`);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete employees';
-      setError(errorMessage);
-      showError('Bulk Deletion Failed', errorMessage);
-    }
-  };
 
   const handleExportEmployees = (employeesToExport: Employee[]) => {
     const csvContent = [
-      ['Name', 'Email', 'Department', 'Position', 'Salary', 'Hire Date'].join(','),
+      ['Name', 'Employee ID', 'Email', 'Phone', 'Department', 'Position', 'Manager', 'Status', 'Salary', 'Hire Date', 'Address'].join(','),
       ...employeesToExport.map(emp => [
-        emp.name,
-        emp.email,
-        emp.department,
-        emp.position,
+        `"${emp.name}"`,
+        `"${emp.employee_id || ''}"`,
+        `"${emp.email}"`,
+        `"${emp.phone || ''}"`,
+        `"${emp.department}"`,
+        `"${emp.position}"`,
+        `"${emp.manager || ''}"`,
+        `"${emp.status || 'Active'}"`,
         emp.salary,
-        emp.hire_date
+        emp.hire_date,
+        `"${emp.address || ''}"`
       ].join(','))
     ].join('\n');
 
@@ -184,15 +121,6 @@ function App() {
     showSuccess('Export Complete', `Exported ${employeesToExport.length} employees to CSV.`);
   };
 
-  const handleEditEmployee = (employee: Employee) => {
-    setEditingEmployee(employee);
-    setShowEmployeeForm(true);
-  };
-
-  const handleCloseForm = () => {
-    setShowEmployeeForm(false);
-    setEditingEmployee(null);
-  };
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
@@ -208,20 +136,12 @@ function App() {
             employees={employees} 
             loading={loading} 
             error={error}
-            onRefresh={handleManualRefresh}
           />
         );
       case 'employees':
         return (
-          <EnhancedEmployeeList
-            employees={employees}
-            loading={loading}
-            error={error}
-            onEdit={handleEditEmployee}
-            onDelete={handleDeleteEmployee}
-            onBulkDelete={handleBulkDelete}
+          <EnterpriseEmployeeTable
             onExport={handleExportEmployees}
-            onRefresh={handleManualRefresh}
           />
         );
       case 'settings':
@@ -229,7 +149,6 @@ function App() {
           <UnifiedSettings
             settings={settings}
             onUpdateSettings={updateSettings}
-            onResetSettings={handleResetSettings}
             serverUrl={serverUrl}
             onServerUrlChange={handleServerUrlChange}
             onTestConnection={testConnection}
@@ -241,7 +160,6 @@ function App() {
             employees={employees} 
             loading={loading} 
             error={error}
-            onRefresh={handleManualRefresh}
           />
         );
     }
@@ -249,7 +167,7 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme={settings.theme}>
-      <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="flex h-screen bg-gray-50">
         <Sidebar
           menuItems={menuItems}
           currentView={currentView}
@@ -258,50 +176,53 @@ function App() {
         
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header */}
-          <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-                  <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-                    {currentView === 'dashboard' && 'Dashboard'}
-                    {currentView === 'employees' && 'Employee Management'}
-                    {currentView === 'settings' && 'Settings'}
-                  </h1>
-                  <p className="text-gray-600 dark:text-gray-400 mt-1">
-                    {currentView === 'dashboard' && 'Overview of your organization'}
-                    {currentView === 'employees' && 'Manage your team members'}
-                    {currentView === 'settings' && 'Configure application and server settings'}
-                  </p>
+          <header className="bg-white border-b border-gray-200 shadow-sm">
+            <div className="px-6 py-6" style={{ minHeight: '96px' }}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg">
+                    {currentView === 'dashboard' && <BarChart3 className="h-5 w-5 text-blue-600" />}
+                    {currentView === 'employees' && <Users className="h-5 w-5 text-blue-600" />}
+                    {currentView === 'settings' && <Settings className="h-5 w-5 text-blue-600" />}
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold text-gray-900">
+                      {currentView === 'dashboard' && 'Dashboard'}
+                      {currentView === 'employees' && 'Employee Management'}
+                      {currentView === 'settings' && 'Settings'}
+                    </h1>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {currentView === 'dashboard' && 'Monitor your organization\'s key metrics and performance'}
+                      {currentView === 'employees' && 'Manage employee records, departments, and organizational structure'}
+                      {currentView === 'settings' && 'Configure system preferences and server connections'}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  {currentView === 'dashboard' && (
+                    <button
+                      onClick={handleManualRefresh}
+                      disabled={loading}
+                      className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                    >
+                      <RefreshCw size={16} className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
+                      Refresh Data
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
-            
-            {currentView === 'employees' && (
-              <button
-                onClick={() => setShowEmployeeForm(true)}
-                className="btn-primary flex items-center gap-2"
-              >
-                <Plus size={20} />
-                Add Employee
-              </button>
-            )}
-          </div>
-        </header>
+          </header>
 
-        {/* Main Content */}
-        <main className="flex-1 overflow-auto p-6">
-          {renderContent()}
-        </main>
-      </div>
+          {/* Main Content */}
+          <main className="flex-1 overflow-auto bg-gray-50">
+            <div className="p-6">
+              {renderContent()}
+            </div>
+          </main>
+        </div>
 
-      {/* Employee Form Modal */}
-      {showEmployeeForm && (
-        <EmployeeForm
-          employee={editingEmployee}
-          onSubmit={editingEmployee ? 
-            (data) => handleUpdateEmployee(editingEmployee.id, data) : 
-            handleCreateEmployee
-          }
-          onCancel={handleCloseForm}
-        />
-      )}
 
 
         {/* Toast Notifications */}
