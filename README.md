@@ -11,9 +11,7 @@ git sparse-checkout set server
 cd server
 
 # Deploy with one command
-./deploy.sh        # Linux/macOS
-# OR
-deploy.bat         # Windows
+./deploy.sh
 ```
 
 ### Manual Deploy
