@@ -43,14 +43,6 @@
       "providerShortName": null,
       "entitlements": null
     },
-    "windows": {
-      "wix": {
-        "language": ["en-US"],
-        "enableDesktopShortcut": true,
-        "enableStartMenuShortcut": true,
-        "shortcutName": "Employee Management System"
-      }
-    },
     "publisher": "Employee Manager Team",
     "copyright": "Copyright © 2024 Employee Manager Team. All rights reserved.",
     "category": "Business",
