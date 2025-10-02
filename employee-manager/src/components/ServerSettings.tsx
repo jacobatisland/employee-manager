@@ -46,30 +46,6 @@ const ServerSettings: React.FC<ServerSettingsProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* VPN Demo Information */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <div className="flex items-start gap-3">
-          <div className="bg-blue-100 p-2 rounded-full">
-            <Shield className="h-5 w-5 text-blue-600" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-blue-900 mb-2">VPN/ZTNA Demo Setup</h3>
-            <p className="text-blue-800 mb-3">
-              This application demonstrates secure access to private network resources. 
-              The server should be hosted in a private subnet that's only accessible through your VPN or ZTNA solution.
-            </p>
-            <div className="space-y-2 text-sm text-blue-700">
-              <p><strong>Typical Setup:</strong></p>
-              <ul className="list-disc list-inside space-y-1 ml-4">
-                <li>Server deployed in private subnet (e.g., 10.0.1.0/24)</li>
-                <li>No direct internet access to server</li>
-                <li>Client connects through VPN/ZTNA to access server</li>
-                <li>Demonstrates secure remote access capabilities</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Server Configuration */}
       <div className="card">

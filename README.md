@@ -109,4 +109,4 @@ npm run tauri:build
 
 ## 📄 License
 
-This demo application is provided as-is for demonstration purposes.
+This application is provided as-is for enterprise use.

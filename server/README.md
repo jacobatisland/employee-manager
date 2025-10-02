@@ -35,7 +35,7 @@ server/
 ├── src/
 │   ├── index.js          # Main server application
 │   ├── initDb.js         # Database initialization
-│   └── generateLargeDataset.js  # Demo data generator
+│   └── generateLargeDataset.js  # Sample data generator
 ├── package.json          # Dependencies and scripts
 ├── deploy.sh            # Linux/macOS deployment script
 ├── deploy.bat           # Windows deployment script
@@ -118,11 +118,11 @@ LOG_LEVEL=info
 - `sortBy` - Sort field (default: name)
 - `sortOrder` - Sort direction (ASC/DESC)
 
-## 🔒 VPN/ZTNA Demo Setup
+## 🌐 Network Configuration
 
-1. **Deploy server on private network:**
+1. **Deploy server on your network:**
    ```bash
-   # Set private IP
+   # Set server IP
    export SERVER_IP=192.168.1.100
    
    # Deploy server
@@ -134,11 +134,6 @@ LOG_LEVEL=info
    - Go to Settings → Server Configuration
    - Set server URL: `http://192.168.1.100:3001`
    - Test connection
-
-3. **Demo scenarios:**
-   - **Without VPN:** Connection fails (secure)
-   - **With VPN:** Full access to employee data
-   - **Branch office:** ZTNA tunnel access
 
 ## 🛠️ Troubleshooting
 
@@ -175,7 +170,7 @@ chmod +x *.sh
 - **Security headers** for production use
 - **Health checks** for monitoring
 - **Environment configuration**
-- **Auto-generated demo data**
+- **Auto-generated sample data**
 
 ## 🔄 Updates
 
