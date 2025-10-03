@@ -66,13 +66,13 @@ function App() {
   }, [isLoaded, settings.defaultView]);
 
   useEffect(() => {
-    if (currentView === 'employees' || currentView === 'dashboard') {
+    if (isLoaded && (currentView === 'employees' || currentView === 'dashboard')) {
       // Only fetch if we don't have employees data or if there's no current error, or if error was not dismissed
       if (employees.length === 0 || !error || !errorDismissed) {
         fetchEmployees();
       }
     }
-  }, [currentView, serverUrl]);
+  }, [isLoaded, currentView, serverUrl]);
 
   // Auto-refresh functionality
   useEffect(() => {

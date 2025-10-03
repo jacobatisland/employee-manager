@@ -17,7 +17,7 @@ const defaultSettings: UserSettings = {
   autoRefresh: false,
   refreshInterval: 5,
   showWelcomeMessage: true,
-  serverUrl: 'http://localhost:3001'
+  serverUrl: 'https://employee-db.se-island.life:4001'
 };
 
 const STORAGE_KEY = 'employee-manager-settings';

@@ -70,7 +70,7 @@ const ServerSettings: React.FC<ServerSettingsProps> = ({
                   value={localUrl}
                   onChange={(e) => handleUrlChange(e.target.value)}
                   className="input-field"
-                  placeholder="http://localhost:3001"
+                  placeholder="https://employee-db.se-island.life:4001"
                 />
                 <p className="mt-1 text-sm text-gray-500">
                   Enter the full URL of your Employee Management System server

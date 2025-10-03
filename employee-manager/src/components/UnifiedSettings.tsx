@@ -99,7 +99,7 @@ const UnifiedSettings: React.FC<UnifiedSettingsProps> = ({
                   value={localUrl}
                   onChange={(e) => handleUrlChange(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="http://localhost:3001"
+                  placeholder="https://employee-db.se-island.life:4001"
                 />
                 <p className="mt-1 text-sm text-gray-500">
                   Enter the full URL of your Employee Management System server
