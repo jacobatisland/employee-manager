@@ -1,4 +1,4 @@
-name: Build Windows MSI Installer
+name: Windows MSI Build
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-msi:
+  build-windows-msi:
     runs-on: windows-latest
     
     steps:
@@ -51,16 +51,16 @@ jobs:
     - name: Debug - Check build output
       run: |
         echo "Checking if build directory exists:"
-        dir employee-manager\src-tauri\target\x86_64-pc-windows-msvc\release\bundle\
+        Get-ChildItem -Path "employee-manager\src-tauri\target\x86_64-pc-windows-msvc\release\bundle\" -Force
         echo ""
         echo "Checking MSI directory:"
         if (Test-Path "employee-manager\src-tauri\target\x86_64-pc-windows-msvc\release\bundle\msi\") {
           echo "MSI directory exists:"
-          dir employee-manager\src-tauri\target\x86_64-pc-windows-msvc\release\bundle\msi\
+          Get-ChildItem -Path "employee-manager\src-tauri\target\x86_64-pc-windows-msvc\release\bundle\msi\" -Force
         } else {
           echo "MSI directory does not exist!"
           echo "Available directories:"
-          Get-ChildItem -Path "employee-manager\src-tauri\target\x86_64-pc-windows-msvc\release\bundle\" -Directory
+          Get-ChildItem -Path "employee-manager\src-tauri\target\x86_64-pc-windows-msvc\release\bundle\" -Directory -Force
         }
 
     - name: Upload MSI artifact
