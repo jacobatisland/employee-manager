@@ -53,9 +53,6 @@ const UnifiedSettings: React.FC<UnifiedSettingsProps> = ({
   };
 
 
-  const handleItemsPerPageChange = (itemsPerPage: number) => {
-    onUpdateSettings({ itemsPerPage });
-  };
 
   const handleAutoRefreshChange = (autoRefresh: boolean) => {
     onUpdateSettings({ autoRefresh });
@@ -99,7 +96,7 @@ const UnifiedSettings: React.FC<UnifiedSettingsProps> = ({
                   value={localUrl}
                   onChange={(e) => handleUrlChange(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="https://employee-db.se-island.life:4001"
+                  placeholder="employee-db.se-island.life:4001"
                 />
                 <p className="mt-1 text-sm text-gray-500">
                   Enter the full URL of your Employee Management System server
@@ -216,22 +213,6 @@ const UnifiedSettings: React.FC<UnifiedSettingsProps> = ({
             </div>
           </div>
 
-          {/* Items Per Page */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Items per page
-            </label>
-            <select
-              value={settings.itemsPerPage}
-              onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-              className="w-32 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
-          </div>
 
           {/* Show Welcome Message */}
           <div className="flex items-center justify-between">

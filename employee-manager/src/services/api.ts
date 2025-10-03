@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { Employee } from '../types';
 
-const SERVER_URL = 'https://employee-db.se-island.life:4001'; // Default server URL
+const SERVER_URL = 'employee-db.se-island.life:4001'; // Default server URL
 
 export interface PaginationParams {
   page?: number;
