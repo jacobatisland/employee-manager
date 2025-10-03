@@ -17,9 +17,6 @@ const UserSettingsComponent: React.FC<UserSettingsProps> = ({
     onUpdateSettings({ theme });
   };
 
-  const handleItemsPerPageChange = (itemsPerPage: number) => {
-    onUpdateSettings({ itemsPerPage });
-  };
 
   const handleAutoRefreshChange = (autoRefresh: boolean) => {
     onUpdateSettings({ autoRefresh });
@@ -109,22 +106,6 @@ const UserSettingsComponent: React.FC<UserSettingsProps> = ({
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Display Settings</h3>
         
         <div className="space-y-4">
-          {/* Items Per Page */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Items per page
-            </label>
-            <select
-              value={settings.itemsPerPage}
-              onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-              className="input-field w-32"
-            >
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
-          </div>
 
           {/* Show Welcome Message */}
           <div className="flex items-center justify-between">

@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 export interface UserSettings {
   defaultView: 'dashboard' | 'employees' | 'settings';
   theme: 'light' | 'dark' | 'system';
-  itemsPerPage: number;
   autoRefresh: boolean;
   refreshInterval: number; // in minutes
   showWelcomeMessage: boolean;
@@ -13,7 +12,6 @@ export interface UserSettings {
 const defaultSettings: UserSettings = {
   defaultView: 'employees',
   theme: 'light',
-  itemsPerPage: 25,
   autoRefresh: false,
   refreshInterval: 5,
   showWelcomeMessage: true,
