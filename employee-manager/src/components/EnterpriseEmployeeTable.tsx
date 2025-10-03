@@ -265,9 +265,14 @@ const EnterpriseEmployeeTable: React.FC<EnterpriseEmployeeTableProps> = ({
       employeeAPI.setServerUrl(serverUrl);
       const response = await employeeAPI.fetchAllEmployees();
       setAllEmployees(response);
+      setFilteredEmployees([]); // Clear filtered data on successful fetch
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch employees');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch employees';
+      setError(errorMessage);
+      // Clear all data when there's an error
       setAllEmployees([]);
+      setFilteredEmployees([]);
+      console.error('Failed to fetch employees:', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -323,6 +328,18 @@ const EnterpriseEmployeeTable: React.FC<EnterpriseEmployeeTableProps> = ({
     fetchAllEmployees();
   }, [fetchAllEmployees]);
 
+  // Auto-retry when there's an error (every 30 seconds)
+  useEffect(() => {
+    if (error) {
+      const retryInterval = setInterval(() => {
+        console.log('Auto-retrying connection...');
+        fetchAllEmployees();
+      }, 30000); // Retry every 30 seconds
+
+      return () => clearInterval(retryInterval);
+    }
+  }, [error, fetchAllEmployees]);
+
   // Apply filters and pagination when data or filters change
   useEffect(() => {
     applyFiltersAndPagination();
@@ -368,15 +385,35 @@ const EnterpriseEmployeeTable: React.FC<EnterpriseEmployeeTableProps> = ({
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-        <h3 className="text-red-800 font-medium mb-2">Connection Error</h3>
-        <p className="text-red-600">{error}</p>
-        <button
-          onClick={fetchAllEmployees}
-          className="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-        >
-          <RefreshCw size={16} className="mr-2" />
-          Retry
-        </button>
+        <div className="flex items-center mb-3">
+          <div className="flex-shrink-0">
+            <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+              <span className="text-red-600 text-sm font-semibold">!</span>
+            </div>
+          </div>
+          <div className="ml-3">
+            <h3 className="text-red-800 font-medium">Server Connection Error</h3>
+            <p className="text-red-600 text-sm mt-1">
+              Unable to connect to server at <code className="bg-red-100 px-1 rounded">{serverUrl}</code>
+            </p>
+          </div>
+        </div>
+        <div className="bg-red-100 border border-red-200 rounded-md p-3 mb-4">
+          <p className="text-red-700 text-sm font-medium">Error Details:</p>
+          <p className="text-red-600 text-sm mt-1">{error}</p>
+        </div>
+        <div className="flex space-x-3">
+          <button
+            onClick={fetchAllEmployees}
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          >
+            <RefreshCw size={16} className="mr-2" />
+            Retry Now
+          </button>
+          <p className="text-red-600 text-sm flex items-center">
+            Auto-retrying every 30 seconds...
+          </p>
+        </div>
       </div>
     );
   }
