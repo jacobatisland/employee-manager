@@ -232,11 +232,13 @@ const DEFAULT_COLUMNS: ColumnConfig[] = [
 
 interface EnterpriseEmployeeTableProps {
   onExport?: (employees: Employee[]) => void;
+  serverUrl: string;
 }
 
 
 const EnterpriseEmployeeTable: React.FC<EnterpriseEmployeeTableProps> = ({
-  onExport
+  onExport,
+  serverUrl
 }) => {
   // Internal state for pagination and data
   const [allEmployees, setAllEmployees] = useState<Employee[]>([]);
@@ -259,6 +261,8 @@ const EnterpriseEmployeeTable: React.FC<EnterpriseEmployeeTableProps> = ({
     setError(null);
     
     try {
+      // Set the server URL before making API calls
+      employeeAPI.setServerUrl(serverUrl);
       const response = await employeeAPI.fetchAllEmployees();
       setAllEmployees(response);
     } catch (err) {
@@ -267,7 +271,7 @@ const EnterpriseEmployeeTable: React.FC<EnterpriseEmployeeTableProps> = ({
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [serverUrl]);
 
   // Client-side filtering and pagination
   const applyFiltersAndPagination = useCallback(() => {
@@ -314,7 +318,7 @@ const EnterpriseEmployeeTable: React.FC<EnterpriseEmployeeTableProps> = ({
     setFilteredEmployees(paginatedEmployees);
   }, [allEmployees, searchTerm, selectedDepartment, selectedStatus, sortField, sortDirection, currentPage, pageSize]);
 
-  // Fetch all employees on component mount
+  // Fetch all employees on component mount and when server URL changes
   useEffect(() => {
     fetchAllEmployees();
   }, [fetchAllEmployees]);
