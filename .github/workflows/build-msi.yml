@@ -51,21 +51,21 @@ jobs:
     - name: Debug - Check build output
       run: |
         echo "Checking if build directory exists:"
-        ls -la employee-manager/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/
+        dir employee-manager\src-tauri\target\x86_64-pc-windows-msvc\release\bundle\
         echo ""
         echo "Checking MSI directory:"
-        if [ -d "employee-manager/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/" ]; then
+        if (Test-Path "employee-manager\src-tauri\target\x86_64-pc-windows-msvc\release\bundle\msi\") {
           echo "MSI directory exists:"
-          ls -la employee-manager/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/
-        else
+          dir employee-manager\src-tauri\target\x86_64-pc-windows-msvc\release\bundle\msi\
+        } else {
           echo "MSI directory does not exist!"
           echo "Available directories:"
-          find employee-manager/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/ -type d
-        fi
+          Get-ChildItem -Path "employee-manager\src-tauri\target\x86_64-pc-windows-msvc\release\bundle\" -Directory
+        }
 
     - name: Upload MSI artifact
       uses: actions/upload-artifact@v4
       with:
         name: employee-management-system-windows-msi
-        path: employee-manager/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi
+        path: employee-manager\src-tauri\target\x86_64-pc-windows-msvc\release\bundle\msi\*.msi
         retention-days: 30
