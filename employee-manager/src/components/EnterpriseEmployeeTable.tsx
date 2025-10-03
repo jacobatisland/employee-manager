@@ -233,12 +233,14 @@ const DEFAULT_COLUMNS: ColumnConfig[] = [
 interface EnterpriseEmployeeTableProps {
   onExport?: (employees: Employee[]) => void;
   serverUrl: string;
+  isLoaded: boolean;
 }
 
 
 const EnterpriseEmployeeTable: React.FC<EnterpriseEmployeeTableProps> = ({
   onExport,
-  serverUrl
+  serverUrl,
+  isLoaded
 }) => {
   // Internal state for pagination and data
   const [allEmployees, setAllEmployees] = useState<Employee[]>([]);
@@ -323,10 +325,12 @@ const EnterpriseEmployeeTable: React.FC<EnterpriseEmployeeTableProps> = ({
     setFilteredEmployees(paginatedEmployees);
   }, [allEmployees, searchTerm, selectedDepartment, selectedStatus, sortField, sortDirection, currentPage, pageSize]);
 
-  // Fetch all employees on component mount and when server URL changes
+  // Fetch all employees only when settings are loaded and server URL changes
   useEffect(() => {
-    fetchAllEmployees();
-  }, [fetchAllEmployees]);
+    if (isLoaded) {
+      fetchAllEmployees();
+    }
+  }, [isLoaded, fetchAllEmployees]);
 
   // Auto-retry when there's an error (every 30 seconds)
   useEffect(() => {
@@ -366,6 +370,22 @@ const EnterpriseEmployeeTable: React.FC<EnterpriseEmployeeTableProps> = ({
 
 
   const visibleColumns = useMemo(() => columns.filter(col => col.visible), [columns]);
+
+  // Show loading state if settings are not loaded yet
+  if (!isLoaded) {
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+        <div className="animate-pulse">
+          <div className="h-16 bg-gray-100 rounded-t-lg"></div>
+          <div className="p-6 space-y-4">
+            <div className="text-center text-gray-500 py-8">
+              Loading settings...
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

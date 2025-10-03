@@ -143,6 +143,7 @@ function App() {
           <EnterpriseEmployeeTable
             onExport={handleExportEmployees}
             serverUrl={serverUrl}
+            isLoaded={isLoaded}
           />
         );
       case 'settings':
