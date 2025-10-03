@@ -32,6 +32,14 @@ export const useSettings = () => {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsedSettings = JSON.parse(stored);
+        
+        // Migrate old server URL to new default
+        if (parsedSettings.serverUrl === 'http://localhost:3001' || 
+            parsedSettings.serverUrl === 'https://employee-db.se-island.life:4001') {
+          parsedSettings.serverUrl = defaultSettings.serverUrl;
+          console.log('Migrated server URL to new default:', defaultSettings.serverUrl);
+        }
+        
         setSettings({ ...defaultSettings, ...parsedSettings });
       }
     } catch (error) {
