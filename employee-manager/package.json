@@ -1,6 +1,6 @@
 {
   "name": "employee-manager",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Employee Management System",
   "type": "module",
   "scripts": {

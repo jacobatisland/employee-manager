@@ -81,6 +81,10 @@ export const useSettings = () => {
         if (externalConfig && externalConfig.server_url) {
           console.log('Using external config server URL:', externalConfig.server_url);
           parsedSettings.serverUrl = externalConfig.server_url;
+        } else {
+          // If no external config exists, create one with the default URL
+          console.log('No external config found, creating default config file');
+          writeExternalConfig(defaultSettings.serverUrl);
         }
         
         setSettings({ ...defaultSettings, ...parsedSettings });
