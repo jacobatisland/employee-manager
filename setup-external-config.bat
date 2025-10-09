@@ -24,13 +24,13 @@ echo 📄 Creating config file: %CONFIG_FILE%
 
 REM Get server URL from user
 echo.
-echo 🌐 Enter the server URL (e.g., employee-db.se-island.life:4001):
+echo 🌐 Enter the server URL (e.g., http://employee-db.se-island.life:4001):
 set /p SERVER_URL="Server URL: "
 
 REM Validate server URL
 if "%SERVER_URL%"=="" (
     echo ❌ Server URL cannot be empty. Using default.
-    set "SERVER_URL=employee-db.se-island.life:4001"
+    set "SERVER_URL=http://employee-db.se-island.life:4001"
 )
 
 REM Create the config file

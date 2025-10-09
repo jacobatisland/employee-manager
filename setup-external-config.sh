@@ -36,13 +36,13 @@ echo "📄 Creating config file: $CONFIG_FILE"
 
 # Get server URL from user
 echo ""
-echo "🌐 Enter the server URL (e.g., employee-db.se-island.life:4001):"
+echo "🌐 Enter the server URL (e.g., http://employee-db.se-island.life:4001):"
 read -p "Server URL: " SERVER_URL
 
 # Validate server URL
 if [[ -z "$SERVER_URL" ]]; then
     echo "❌ Server URL cannot be empty. Using default."
-    SERVER_URL="employee-db.se-island.life:4001"
+    SERVER_URL="http://employee-db.se-island.life:4001"
 fi
 
 # Create the config file

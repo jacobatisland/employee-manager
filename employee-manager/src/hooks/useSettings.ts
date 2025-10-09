@@ -10,7 +10,7 @@ export interface UserSettings {
 }
 
 export interface ExternalConfig {
-  serverUrl?: string;
+  server_url?: string;
 }
 
 const defaultSettings: UserSettings = {
@@ -19,7 +19,7 @@ const defaultSettings: UserSettings = {
   autoRefresh: false,
   refreshInterval: 5,
   showWelcomeMessage: true,
-  serverUrl: 'employee-db.se-island.life:4001'
+  serverUrl: 'http://employee-db.se-island.life:4001'
 };
 
 const STORAGE_KEY = 'employee-manager-settings';
@@ -40,6 +40,20 @@ const loadExternalConfig = async (): Promise<ExternalConfig | null> => {
   }
 };
 
+// Function to write external config file
+const writeExternalConfig = async (serverUrl: string): Promise<void> => {
+  try {
+    // Check if we're running in a Tauri environment
+    if (typeof window !== 'undefined' && (window as any).__TAURI__) {
+      const { invoke } = await import('@tauri-apps/api/core');
+      await invoke('write_external_config', { serverUrl });
+      console.log('External config updated with server URL:', serverUrl);
+    }
+  } catch (error) {
+    console.error('Failed to write external config:', error);
+  }
+};
+
 export const useSettings = () => {
   const [settings, setSettings] = useState<UserSettings>(defaultSettings);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -57,15 +71,16 @@ export const useSettings = () => {
         
         // Migrate old server URL to new default
         if (parsedSettings.serverUrl === 'http://localhost:3001' || 
-            parsedSettings.serverUrl === 'https://employee-db.se-island.life:4001') {
+            parsedSettings.serverUrl === 'https://employee-db.se-island.life:4001' ||
+            parsedSettings.serverUrl === 'employee-db.se-island.life:4001') {
           parsedSettings.serverUrl = defaultSettings.serverUrl;
           console.log('Migrated server URL to new default:', defaultSettings.serverUrl);
         }
         
         // Apply external config if available (takes precedence)
-        if (externalConfig && externalConfig.serverUrl) {
-          console.log('Using external config server URL:', externalConfig.serverUrl);
-          parsedSettings.serverUrl = externalConfig.serverUrl;
+        if (externalConfig && externalConfig.server_url) {
+          console.log('Using external config server URL:', externalConfig.server_url);
+          parsedSettings.serverUrl = externalConfig.server_url;
         }
         
         setSettings({ ...defaultSettings, ...parsedSettings });
@@ -92,7 +107,16 @@ export const useSettings = () => {
   }, [settings, isLoaded]);
 
   const updateSettings = (updates: Partial<UserSettings>) => {
-    setSettings(prev => ({ ...prev, ...updates }));
+    setSettings(prev => {
+      const newSettings = { ...prev, ...updates };
+      
+      // If server URL is being updated, also write to external config
+      if (updates.serverUrl && updates.serverUrl !== prev.serverUrl) {
+        writeExternalConfig(updates.serverUrl);
+      }
+      
+      return newSettings;
+    });
   };
 
   const resetSettings = () => {

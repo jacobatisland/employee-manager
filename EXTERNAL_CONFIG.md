@@ -20,7 +20,7 @@ Create a JSON file with the following structure:
 
 ```json
 {
-  "serverUrl": "your-server-url:port"
+  "server_url": "http://your-server-url:port"
 }
 ```
 
@@ -28,7 +28,7 @@ Create a JSON file with the following structure:
 
 ```json
 {
-  "serverUrl": "employee-db.se-island.life:4001"
+  "server_url": "http://employee-db.se-island.life:4001"
 }
 ```
 

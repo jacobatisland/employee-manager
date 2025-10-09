@@ -1,9 +1,9 @@
 {
-  "serverUrl": "employee-db.se-island.life:4001",
+  "server_url": "http://employee-db.se-island.life:4001",
   "description": "Employee Management System Configuration",
   "instructions": {
     "macOS": "Edit this file and place it at: ~/Library/Application Support/com.employeemanager/config.json",
     "Windows": "Edit this file and place it at: %APPDATA%\\com.employeemanager\\config.json",
-    "note": "The app will check for this file on startup and use the serverUrl if found"
+    "note": "The app will check for this file on startup and use the server_url if found"
   }
 }

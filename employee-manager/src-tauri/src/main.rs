@@ -292,6 +292,36 @@ async fn read_external_config(app_handle: tauri::AppHandle) -> Result<Option<Ext
     }
 }
 
+#[tauri::command]
+async fn write_external_config(app_handle: tauri::AppHandle, server_url: String) -> Result<(), String> {
+    // Get the app data directory using Tauri 2.0 API
+    let app_data_dir = app_handle.path().app_data_dir()
+        .map_err(|e| format!("Failed to get app data directory: {}", e))?;
+    
+    // Create the config directory if it doesn't exist
+    if !app_data_dir.exists() {
+        std::fs::create_dir_all(&app_data_dir)
+            .map_err(|e| format!("Failed to create config directory: {}", e))?;
+    }
+    
+    // Create the config file path
+    let config_path = app_data_dir.join("config.json");
+    
+    // Create the config object
+    let config = ExternalConfig {
+        server_url: Some(server_url),
+    };
+    
+    // Write the config file
+    let config_json = serde_json::to_string_pretty(&config)
+        .map_err(|e| format!("Failed to serialize config: {}", e))?;
+    
+    std::fs::write(&config_path, config_json)
+        .map_err(|e| format!("Failed to write config file: {}", e))?;
+    
+    Ok(())
+}
+
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
@@ -302,7 +332,8 @@ fn main() {
             create_employee,
             update_employee,
             delete_employee,
-            read_external_config
+            read_external_config,
+            write_external_config
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
