@@ -27,7 +27,7 @@
   },
   "plugins": {
     "fs": {
-      "scope": ["$APPDATA/**", "$APPLOCALDATA/**", "$APPLOCALDATA/**"]
+      "requireLiteralLeadingDot": false
     }
   },
   "bundle": {
