@@ -1,7 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use tauri::Manager;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Employee {
@@ -80,6 +80,11 @@ struct ApiResponse<T> {
     success: bool,
     data: Option<T>,
     message: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct ExternalConfig {
+    server_url: Option<String>,
 }
 
 // Tauri commands for communicating with the server
@@ -261,15 +266,43 @@ async fn delete_employee(server_url: String, id: u32) -> Result<bool, String> {
     }
 }
 
+#[tauri::command]
+async fn read_external_config(app_handle: tauri::AppHandle) -> Result<Option<ExternalConfig>, String> {
+    // Get the app data directory using Tauri 2.0 API
+    let app_data_dir = app_handle.path().app_data_dir()
+        .map_err(|e| format!("Failed to get app data directory: {}", e))?;
+    
+    // Create the config file path
+    let config_path = app_data_dir.join("config.json");
+    
+    // Check if the config file exists
+    if !config_path.exists() {
+        return Ok(None);
+    }
+    
+    // Read the config file
+    match std::fs::read_to_string(&config_path) {
+        Ok(content) => {
+            match serde_json::from_str::<ExternalConfig>(&content) {
+                Ok(config) => Ok(Some(config)),
+                Err(e) => Err(format!("Failed to parse config file: {}", e)),
+            }
+        }
+        Err(e) => Err(format!("Failed to read config file: {}", e)),
+    }
+}
+
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_fs::init())
         .invoke_handler(tauri::generate_handler![
             fetch_employees,
             fetch_employees_paginated,
             create_employee,
             update_employee,
-            delete_employee
+            delete_employee,
+            read_external_config
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

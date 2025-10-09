@@ -34,10 +34,31 @@ LOG_LEVEL=info              # Logging level
 ```
 
 ### Client Configuration
+
+#### In-App Configuration
 1. Launch the desktop application
 2. Go to Settings → Server Configuration
 3. Set server URL: `http://your-server-ip:3001`
 4. Test connection
+
+#### External Configuration (Advanced)
+For system administrators, the server URL can be configured via external JSON files:
+
+**macOS**: `~/Library/Application Support/com.employeemanager/config.json`
+**Windows**: `%APPDATA%\com.employeemanager\config.json`
+
+Example config file:
+```json
+{
+  "server_url": "your-server-url:port"
+}
+```
+
+**Setup Scripts**:
+- **macOS/Linux**: Run `./setup-external-config.sh`
+- **Windows**: Run `setup-external-config.bat`
+
+For detailed instructions, see [EXTERNAL_CONFIG.md](EXTERNAL_CONFIG.md).
 
 
 ## 📦 Client Distribution

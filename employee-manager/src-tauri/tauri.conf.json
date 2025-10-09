@@ -25,6 +25,11 @@
       "csp": null
     }
   },
+  "plugins": {
+    "fs": {
+      "scope": ["$APPDATA/**", "$APPLOCALDATA/**", "$APPLOCALDATA/**"]
+    }
+  },
   "bundle": {
     "active": true,
     "targets": ["msi"],
